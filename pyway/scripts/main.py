@@ -8,6 +8,7 @@ from pyway.migrate import Migrate
 from pyway.validate import Validate
 from pyway.import_ import Import
 from pyway.checksum import Checksum
+from pyway.helpers import Utils
 from pyway.version import __version__
 
 
@@ -32,7 +33,6 @@ def info(config: ConfigFile) -> None:
     logger.info('Gathering info...')
     tbl = Info(config).run()
     logger.info(tbl)
-    print()
 
 
 def import_(config: ConfigFile) -> None:
@@ -50,20 +50,13 @@ def checksum(config: ConfigFile) -> None:
 def cli() -> None:
     logger.info(f"PyWay {__version__}")
 
-    config = ConfigFile()
-    config = Settings.parse_config_file(config)
-    (config, parser) = Settings.parse_arguments(config)
+    config = Settings.parse_arguments()
+    config_file = Settings.parse_config_file(config.config)
+    config.merge(config_file)
 
-    # Display version if it exists
-    if config.version:
-        print(f"Version: {__version__}")
-        sys.exit(1)
-
-    # If no arg is specified, show help
-    if not config.cmd:
-        # TODO: figure out how to print help
-        parser.print_help()
-        sys.exit(1)
+    # Validate required vars
+    Utils.check_required_vars(["database_type", "database_table", "database_host",
+                               "database_name", "database_username"], config)
 
     if config.cmd == "info":
         info(config)

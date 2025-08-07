@@ -41,6 +41,7 @@ Priority is `env variables` -> `config file` -> `command args`
 | PYWAY_DATABASE_NAME | --database-name | Name of database to connect | *None* |
 | PYWAY_DATABASE_USERNAME |--database-username | User to use to connect to the database | *None* |
 | PYWAY_DATABASE_PASSWORD | --database-password | Password to use to connect to the database | *None* |
+| PYWAY_DATABASE_COLLATION | --database-collation | Collation type to use in the database | MySQL: utf8mb4_general_ci Postgres: *not supported*|
 | PYWAY_CONFIG_FILE | -c, --config | Configuration file | .pyway.conf |
 | | --schema-file | Used when importing a schema file | |
 | | --checksum-file | Used when updating a checksum - *advanced use*! | |
@@ -81,7 +82,8 @@ Example: V01_01__initial_schema.sql
 
 Example: V01_01_01__initial_schema.sql
 
-Note that the description needs to match the word regexp [A-Za-z0-9_]
+The description needs to match the word regexp [A-Za-z0-9_].
+It also supports 2 digits per version component, so 99.99.99 is the maximum version allowed.
 
 
 ## Usage
