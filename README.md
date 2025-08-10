@@ -33,7 +33,7 @@ Priority is `env variables` -> `config file` -> `command args`
 | PYWAY_DATABASE_MIGRATION_DIR | --database-migration-dir | Folder name to migration files | resources |
 | PYWAY_SQL_MIGRATION_PREFIX | | Prefix for version in migration file | V |
 | PYWAY_SQL_MIGRATION_SEPARATOR | | Separator between version and description to the migration file | __ |
-| PYWAY_SQL_MIGRATION_SUFFIXES | | Suffix extension for migration files | .sql |
+| PYWAY_SQL_MIGRATION_SUFFIXES | | Suffix extension for SQL migration files | .sql |
 | PYWAY_TABLE | --database-table | Name of schema history table | *None* |
 | PYWAY_TYPE | --database-type | Data Base Management System [`postgres`, `mysql`, `duckdb`, `sqlite` ] | *None* *required* |
 | PYWAY_DATABASE_HOST | --database-host | Host to connect to the database | *None* |
@@ -45,6 +45,7 @@ Priority is `env variables` -> `config file` -> `command args`
 | PYWAY_CONFIG_FILE | -c, --config | Configuration file | .pyway.conf |
 | | --schema-file | Used when importing a schema file | |
 | | --checksum-file | Used when updating a checksum - *advanced use*! | |
+| | --async | Enable async mode for Python migrations | |
 
 #### Configuration file
 Pyway supports a configuration file with the default file as `.pyway.conf`. A sample config file is below:
@@ -74,7 +75,12 @@ database_table: pyway
 
 
 ## Pyway Files
-Files are raw SQL files that are named like the following. Major/minor versioning and semantic versioning is supported.
+
+Pyway supports both SQL and Python migration files. Major/minor versioning and semantic versioning is supported.
+
+### SQL Migrations
+
+SQL migrations contain raw SQL and are named like the following:
 
 V{major}\_{minor}\_({patch})\_\_{description}.sql
 
@@ -82,8 +88,56 @@ Example: V01_01__initial_schema.sql
 
 Example: V01_01_01__initial_schema.sql
 
-The description needs to match the word regexp [A-Za-z0-9_].
-It also supports 2 digits per version component, so 99.99.99 is the maximum version allowed.
+### Python Migrations
+
+Python migrations enable complex data transformations using the full Python ecosystem. They must define a `migrate(connection)` function:
+
+V{major}\_{minor}\_({patch})\_\_{description}.py
+
+Example: V01_02__data_migration.py
+
+```python
+def migrate(connection):
+    """Transform legacy data format"""
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, old_data FROM legacy_table")
+    
+    for record_id, old_data in cursor.fetchall():
+        new_data = transform_data(old_data)  # Custom Python logic
+        cursor.execute("UPDATE legacy_table SET new_data = ? WHERE id = ?", 
+                      (new_data, record_id))
+    
+    # Note: Transaction is automatically committed by Pyway
+```
+
+### Async Python Migrations
+
+For migrations requiring concurrent operations, use async functions:
+
+```python
+async def migrate(connection):
+    """Fetch data from multiple APIs concurrently"""
+    import asyncio
+    import aiohttp
+    
+    async def fetch_api_data(url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                return await response.json()
+    
+    # Concurrent API calls
+    results = await asyncio.gather(
+        fetch_api_data('https://api1.com/data'),
+        fetch_api_data('https://api2.com/data')
+    )
+    
+    # Store results
+    cursor = connection.cursor()
+    for result in results:
+        cursor.execute("INSERT INTO api_data (data) VALUES (?)", (str(result),))
+    
+    # Note: Transaction is automatically committed by Pyway
+```
 
 
 ## Usage
@@ -104,6 +158,10 @@ Validate helps you verify that the migrations applied to the database match the 
 After `validate`, it will scan the **Database migration dir** for available migrations. It will compare them to the migrations that have been applied to the database. If any new migration is found, it will migrate the database to close the gap.
 
     $ pyway migrate
+
+For async Python migrations or mixed sync/async environments:
+
+    $ pyway migrate --async
 
 #### Import
 This allows the user to import a schema file into the migration, for example if the base schema has already been applied, then the user can import that file in so they can then apply subsequent migrations. Currently the import looks in the `database_migration_dir` for the file.

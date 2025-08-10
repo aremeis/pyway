@@ -1,4 +1,5 @@
 import sys
+import asyncio
 
 from pyway.settings import Settings
 from pyway.settings import ConfigFile
@@ -18,6 +19,16 @@ def migrate(config: ConfigFile) -> None:
 
     logger.info('Starting migration process...')
     output = Migrate(config).run()
+    logger.info(output)
+    logger.info('Migration completed.')
+
+
+async def migrate_async(config: ConfigFile) -> None:
+    # Validate first (reuse sync validation)
+    validate(config, skip_errors=True)
+
+    logger.info('Starting async migration process...')
+    output = await Migrate(config).run_async()
     logger.info(output)
     logger.info('Migration completed.')
 
@@ -63,7 +74,10 @@ def cli() -> None:
     elif config.cmd == "validate":
         validate(config)
     elif config.cmd == "migrate":
-        migrate(config)
+        if hasattr(config, 'async_mode') and config.async_mode:
+            asyncio.run(migrate_async(config))
+        else:
+            migrate(config)
     elif config.cmd == "import":
         import_(config)
     elif config.cmd == "checksum":

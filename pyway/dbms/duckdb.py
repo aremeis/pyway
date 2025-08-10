@@ -42,6 +42,10 @@ class Duckdb():
     def create_version_table_if_not_exists(self) -> None:
         self.execute(CREATE_VERSION_MIGRATIONS_SEQ)
         self.execute(CREATE_VERSION_MIGRATIONS % self.version_table)
+    
+    def should_close_connection(self) -> bool:
+        """DuckDB uses a persistent connection"""
+        return False
 
     def execute(self, script: str) -> None:
         cur = self.connect()

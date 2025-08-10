@@ -17,6 +17,7 @@ class ConfigFile():
         self.checksum_file = None
         self.config = os.environ.get('PYWAY_CONFIG_FILE', '.pyway.conf')
         self.version = False
+        self.async_mode = False
         self.cmd = None
 
     def merge(self, other: 'ConfigFile') -> None:

@@ -50,6 +50,10 @@ class Mysql():
 
     def create_version_table_if_not_exists(self) -> None:
         self.execute(CREATE_VERSION_MIGRATIONS % self.version_table)
+    
+    def should_close_connection(self) -> bool:
+        """MySQL closes connections after each operation"""
+        return True
 
     def execute(self, script: str) -> None:
         cnx = self.connect()

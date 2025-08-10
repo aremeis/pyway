@@ -33,14 +33,14 @@ class Utils():
 
     @staticmethod
     def expected_pattern() -> str:
-        return f'{settings.SQL_MIGRATION_PREFIX}{{major}}_{{minor}}{settings.SQL_MIGRATION_SEPARATOR}' \
-                f'{{description}}{settings.SQL_MIGRATION_SUFFIXES}'
+        return f'{settings.SQL_MIGRATION_PREFIX}{{major}}_{{minor}}_{{patch}}{settings.SQL_MIGRATION_SEPARATOR}' \
+                f'{{description}}[{settings.SQL_MIGRATION_SUFFIXES}|.py]'
 
     @staticmethod
     def is_file_name_valid(name: str) -> bool:
-        _pattern = r"%s\d+[._]\d+|\d+[._]\d+__%s\.%s$" % \
-            (settings.SQL_MIGRATION_PREFIX, settings.SQL_MIGRATION_SEPARATOR, settings.SQL_MIGRATION_SUFFIXES)
-        return re.match(_pattern, name, re.IGNORECASE) is not None
+        _pattern = r"^%s(\d{1,2})(?:[._](\d{1,2}))?(?:[._](\d{1,2}))?%s([A-Za-z0-9_]+(?:%s[A-Za-z0-9_]+)*)(\%s|\.py)$" % \
+            (settings.SQL_MIGRATION_PREFIX, settings.SQL_MIGRATION_SEPARATOR, settings.SQL_MIGRATION_SEPARATOR, settings.SQL_MIGRATION_SUFFIXES)
+        return re.fullmatch(_pattern, name, re.IGNORECASE)
 
     @staticmethod
     def sort_migrations_list(migrations: List[Any]) -> List[Any]:
@@ -94,9 +94,10 @@ class Utils():
         path = Utils.basepath(d)
         dir_list = []
         try:
-            # Skip any hidden files
+            # Skip any hidden files and directories
             for f in os.listdir(path):
-                if not f.startswith('.'):
+                full_path = os.path.join(path, f)
+                if not f.startswith('.') and os.path.isfile(full_path):
                     dir_list.append(f)
         except OSError:
             raise FileNotFoundError(DIRECTORY_NOT_FOUND % path)
