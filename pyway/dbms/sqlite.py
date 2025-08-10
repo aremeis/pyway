@@ -33,7 +33,7 @@ class Sqlite():
 
     def create_version_table_if_not_exists(self) -> None:
         self.execute(CREATE_VERSION_MIGRATIONS % self.version_table)
-    
+
     def should_close_connection(self) -> bool:
         """SQLite closes connections after each operation"""
         return True

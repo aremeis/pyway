@@ -38,9 +38,14 @@ class Utils():
 
     @staticmethod
     def is_file_name_valid(name: str) -> bool:
-        _pattern = r"^%s(\d{1,2})(?:[._](\d{1,2}))?(?:[._](\d{1,2}))?%s([A-Za-z0-9_]+(?:%s[A-Za-z0-9_]+)*)(\%s|\.py)$" % \
-            (settings.SQL_MIGRATION_PREFIX, settings.SQL_MIGRATION_SEPARATOR, settings.SQL_MIGRATION_SEPARATOR, settings.SQL_MIGRATION_SUFFIXES)
-        return re.fullmatch(_pattern, name, re.IGNORECASE)
+        template = r"^%s(\d{1,2})(?:[._](\d{1,2}))?(?:[._](\d{1,2}))?%s([A-Za-z0-9_]+(?:%s[A-Za-z0-9_]+)*)(\%s|\.py)$"
+        _pattern = template % (
+            settings.SQL_MIGRATION_PREFIX,
+            settings.SQL_MIGRATION_SEPARATOR,
+            settings.SQL_MIGRATION_SEPARATOR,
+            settings.SQL_MIGRATION_SUFFIXES
+        )
+        return re.fullmatch(_pattern, name, re.IGNORECASE) is not None
 
     @staticmethod
     def sort_migrations_list(migrations: List[Any]) -> List[Any]:

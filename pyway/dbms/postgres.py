@@ -41,7 +41,7 @@ class Postgres():
 
     def create_version_table_if_not_exists(self) -> None:
         self.execute(CREATE_VERSION_MIGRATIONS % self.version_table)
-    
+
     def should_close_connection(self) -> bool:
         """PostgreSQL doesn't close connections after each operation"""
         return False

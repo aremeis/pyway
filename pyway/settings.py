@@ -42,7 +42,9 @@ class Settings():
         parser.add_argument("--checksum-file", help="Checksum to update")
         parser.add_argument("-c", "--config", help="Config file")
         parser.add_argument("-v", "--version", help="Version", action='store_true')
-        parser.add_argument("--async", dest="async_mode", help="Enable async mode for Python migrations", action='store_true')
+        parser.add_argument("--async", dest="async_mode",
+                            help="Enable async mode for Python migrations",
+                            action='store_true')
         parser.add_argument("cmd", nargs="?", help="info|validate|migrate|import|checksum")
 
         config: ConfigFile = self.parse_args(parser.parse_args())
