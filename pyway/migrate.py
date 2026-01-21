@@ -31,6 +31,7 @@ class Migrate():
             output += Utils.color(f"Migrating --> {migration.name}\n", bcolors.OKBLUE)
             try:
                 if migration.extension.upper() == 'PY':
+                    self.args.prepare_for_python_migrations()
                     self._execute_python_migration(migration)
                 else:
                     # Treat all other extensions as SQL migrations
@@ -53,6 +54,7 @@ class Migrate():
             output += Utils.color(f"Migrating --> {migration.name}\n", bcolors.OKBLUE)
             try:
                 if migration.extension.upper() == 'PY':
+                    self.args.prepare_for_python_migrations()
                     await self._execute_python_migration_async(migration)
                 else:
                     # SQL migrations remain synchronous

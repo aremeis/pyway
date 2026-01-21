@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Any, Union
 
 
@@ -17,13 +18,31 @@ class ConfigFile():
         self.checksum_file = None
         self.config = os.environ.get('PYWAY_CONFIG_FILE', '.pyway.conf')
         self.version = False
-        self.async_mode = False
+        self.async_mode = None
         self.cmd = None
+        self.prepared_for_python_migrations = False
 
     def merge(self, other: 'ConfigFile') -> None:
         for key, value in vars(other).items():
             if value is not None:
                 setattr(self, key, value)
+
+    def prepare_for_python_migrations(self) -> None:
+        if self.prepared_for_python_migrations:
+            return
+
+        # Add the current working directory to the Python path
+        # This is necessary for the Python migrations to be able to reference modules relative to the current working directory
+        sys.path.append(os.getcwd())
+
+        # Make sure all database connection environment variables are set
+        os.environ['PYWAY_DATABASE_TYPE'] = self.database_type
+        os.environ['PYWAY_DATABASE_HOST'] = self.database_host
+        os.environ['PYWAY_DATABASE_PORT'] = str(self.database_port)
+        os.environ['PYWAY_DATABASE_NAME'] = self.database_name
+        os.environ['PYWAY_DATABASE_USERNAME'] = self.database_username
+        os.environ['PYWAY_DATABASE_PASSWORD'] = self.database_password
+        os.environ['PYWAY_DATABASE_COLLATION'] = self.database_collation
 
 
 class MockConfig():
