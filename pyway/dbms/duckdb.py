@@ -12,7 +12,7 @@ from pyway.configfile import ConfigFile
 CREATE_VERSION_MIGRATIONS_SEQ = "create sequence if not exists migration_seq;"
 CREATE_VERSION_MIGRATIONS = "create table if not exists %s ("\
     "installed_rank UBIGINT NOT NULL PRIMARY KEY DEFAULT nextval('migration_seq'),"\
-    "version varchar(20) NOT NULL,"\
+    "version varchar(100) NOT NULL,"\
     "extension varchar(20) NOT NULL,"\
     "name varchar(125) NOT NULL,"\
     "checksum varchar(25) NOT NULL,"\

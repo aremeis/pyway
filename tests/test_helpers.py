@@ -49,7 +49,7 @@ def test_subtract_onlyonearray() -> None:
 @pytest.mark.helpers_test
 def test_expected_pattern() -> None:
     pattern = Utils.expected_pattern()
-    assert pattern == "V{major}_{minor}_{patch}__{description}[.sql|.py]"
+    assert pattern == "V{version}__{description}[.sql|.py]"
 
 
 @pytest.mark.helpers_test
@@ -92,8 +92,11 @@ def test_semantic_version_name_major_minor_period() -> None:
 
 
 @pytest.mark.helpers_test
-def test_semantic_version_name_minor_over_2digits() -> None:
-    assert not Utils.is_file_name_valid('V1_0_100__test1.sql')
+def test_semantic_version_name_large_numbers() -> None:
+    """Test that version numbers with any number of digits are valid"""
+    assert Utils.is_file_name_valid('V1_0_100__test1.sql')
+    assert Utils.is_file_name_valid('V100__test1.sql')
+    assert Utils.is_file_name_valid('V999_999_999__test1.sql')
 
 
 @pytest.mark.helpers_test
@@ -101,7 +104,8 @@ def test_version_name_major_only() -> None:
     """Test that names with only major version are valid"""
     assert Utils.is_file_name_valid('V1__test1.sql')
     assert Utils.is_file_name_valid('V1__test1.py')
-    assert Utils.is_file_name_valid('V99__test1.sql')  # 2 digits max
+    assert Utils.is_file_name_valid('V99__test1.sql')
+    assert Utils.is_file_name_valid('V999__test1.sql')  # Any number of digits
 
 
 # Test illegal version names
@@ -138,12 +142,14 @@ def test_invalid_version_name_malformed_version() -> None:
 
 
 @pytest.mark.helpers_test
-def test_invalid_version_name_wrong_format() -> None:
-    """Test various wrong format combinations"""
+def test_version_name_many_components() -> None:
+    """Test various version component counts"""
     assert Utils.is_file_name_valid('V1.1.1__test1.sql')
     assert Utils.is_file_name_valid('V1_1_1__test1.sql')
     assert Utils.is_file_name_valid('V1_1__test1__extra.sql')
-    assert not Utils.is_file_name_valid('V1.1.1.1__test1.sql')  # 4 version components
+    assert Utils.is_file_name_valid('V1.1.1.1__test1.sql')  # 4 version components
+    assert Utils.is_file_name_valid('V1_2_3_4_5__test1.sql')  # 5 version components
+    assert Utils.is_file_name_valid('V1_2_3_4_5_6_7_8_9_10__test1.sql')  # Many components
 
 
 @pytest.mark.helpers_test
@@ -185,3 +191,45 @@ def test_invalid_version_name_edge_cases() -> None:
     assert not Utils.is_file_name_valid('V__')  # Prefix and separator only
     assert not Utils.is_file_name_valid('V1__')  # Prefix, version, separator only
     assert not Utils.is_file_name_valid('__test1.sql')  # Missing prefix and version
+
+
+@pytest.mark.helpers_test
+def test_version_sort_key() -> None:
+    """Test version sort key conversion"""
+    assert Utils._version_sort_key('1') == (1,)
+    assert Utils._version_sort_key('1.2') == (1, 2)
+    assert Utils._version_sort_key('1.2.3') == (1, 2, 3)
+    assert Utils._version_sort_key('01.02') == (1, 2)  # Leading zeros stripped
+    assert Utils._version_sort_key('1_2_3') == (1, 2, 3)  # Underscore separator
+
+
+@pytest.mark.helpers_test
+def test_version_sorting_numeric_order() -> None:
+    """Test that versions sort numerically, not lexicographically"""
+    migrations = [
+        {'version': '2', 'name': 'V2__b.sql'},
+        {'version': '10', 'name': 'V10__c.sql'},
+        {'version': '1', 'name': 'V1__a.sql'},
+    ]
+    sorted_migrations = Utils.sort_migrations_list(migrations)
+    assert [m['version'] for m in sorted_migrations] == ['1', '2', '10']
+
+
+@pytest.mark.helpers_test
+def test_version_sorting_multi_component() -> None:
+    """Test that multi-component versions sort correctly"""
+    migrations = [
+        {'version': '1.10', 'name': 'V1_10__c.sql'},
+        {'version': '1.2', 'name': 'V1_2__b.sql'},
+        {'version': '1.1', 'name': 'V1_1__a.sql'},
+    ]
+    sorted_migrations = Utils.sort_migrations_list(migrations)
+    assert [m['version'] for m in sorted_migrations] == ['1.1', '1.2', '1.10']
+
+
+@pytest.mark.helpers_test
+def test_format_version() -> None:
+    """Test version formatting (normalization)"""
+    assert Utils.format_version('1_2_3') == '1.2.3'
+    assert Utils.format_version('01_02_03') == '01.02.03'  # Padding preserved
+    assert Utils.format_version('100.200.300') == '100.200.300'

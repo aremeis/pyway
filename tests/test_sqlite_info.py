@@ -6,14 +6,15 @@ from pyway.settings import ConfigFile
 
 from pyway.dbms.database import factory
 
-INFO_OUTPUT = """+-----------+-------------+-------------------+------------+-------------------+
-|   version | extension   | name              | checksum   | apply_timestamp   |
-|-----------+-------------+-------------------+------------+-------------------|
-|      1.01 | SQL         | V01_01__test1.sql | new        | new               |
-|      1.02 | SQL         | V01_02__test2.sql | new        | new               |
-|      1.03 | SQL         | V01_03__test3.sql | new        | new               |
-|      1.04 | SQL         | V01_04__test4.sql | new        | new               |
-+-----------+-------------+-------------------+------------+-------------------+"""
+INFO_OUTPUT = """+-----------+-------------+-----------------------------+------------+-------------------+
+| version   | extension   | name                        | checksum   | apply_timestamp   |
+|-----------+-------------+-----------------------------+------------+-------------------|
+| 01.01     | SQL         | V01_01__test1.sql           | new        | new               |
+| 01.02     | SQL         | V01_02__test2.sql           | new        | new               |
+| 01.03     | SQL         | V01_03__test3.sql           | new        | new               |
+| 01.04     | SQL         | V01_04__test4.sql           | new        | new               |
+| 01.05     | PY          | V01_05__python_migration.py | new        | new               |
++-----------+-------------+-----------------------------+------------+-------------------+"""
 
 
 @pytest.fixture

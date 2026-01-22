@@ -1,7 +1,7 @@
 import os
 import re
 import zlib
-from typing import Any, Dict, List, Iterable
+from typing import Any, Dict, List, Iterable, Tuple
 
 from pyway import settings
 from pyway.errors import VALID_NAME_ERROR, DIRECTORY_NOT_FOUND, OUT_OF_DATE_ERROR
@@ -21,6 +21,11 @@ class bcolors():
 class Utils():
 
     @staticmethod
+    def _version_sort_key(version: str) -> Tuple[int, ...]:
+        """Convert version string to tuple of ints for correct numeric sorting."""
+        return tuple(int(c) for c in version.replace("_", ".").split("."))
+
+    @staticmethod
     def subtract(list_a: List, list_b: List) -> List:
         result = []
         if list_a and list_b:
@@ -33,24 +38,31 @@ class Utils():
 
     @staticmethod
     def expected_pattern() -> str:
-        return f'{settings.SQL_MIGRATION_PREFIX}{{major}}_{{minor}}_{{patch}}{settings.SQL_MIGRATION_SEPARATOR}' \
+        return f'{settings.SQL_MIGRATION_PREFIX}{{version}}{settings.SQL_MIGRATION_SEPARATOR}' \
                 f'{{description}}[{settings.SQL_MIGRATION_SUFFIXES}|.py]'
 
     @staticmethod
     def is_file_name_valid(name: str) -> bool:
-        template = r"^%s(\d{1,2})(?:[._](\d{1,2}))?(?:[._](\d{1,2}))?%s([A-Za-z0-9_]+(?:%s[A-Za-z0-9_]+)*)(\%s|\.py)$"
+        template = r"^%s\d+(?:[._]\d+)*%s([A-Za-z0-9_]+(?:%s[A-Za-z0-9_]+)*)(\%s|\.py)$"
         _pattern = template % (
-            settings.SQL_MIGRATION_PREFIX,
-            settings.SQL_MIGRATION_SEPARATOR,
-            settings.SQL_MIGRATION_SEPARATOR,
+            re.escape(settings.SQL_MIGRATION_PREFIX),
+            re.escape(settings.SQL_MIGRATION_SEPARATOR),
+            re.escape(settings.SQL_MIGRATION_SEPARATOR),
             settings.SQL_MIGRATION_SUFFIXES
         )
         return re.fullmatch(_pattern, name, re.IGNORECASE) is not None
 
     @staticmethod
     def sort_migrations_list(migrations: List[Any]) -> List[Any]:
-        return sorted(migrations, key=lambda x: [x.get("version"), x.get("name")] if isinstance(x, dict) else
-                                                [x.version, x.name], reverse=False)
+        def sort_key(x: Any) -> Tuple[Tuple[int, ...], str]:
+            if isinstance(x, dict):
+                version = x.get("version", "")
+                name = x.get("name", "")
+            else:
+                version = x.version
+                name = x.name
+            return (Utils._version_sort_key(version), name)
+        return sorted(migrations, key=sort_key)
 
     @staticmethod
     def flatten_migrations(migrations: Iterable[Any]) -> List[Dict[Any, Any]]:
@@ -63,15 +75,15 @@ class Utils():
 
     @staticmethod
     def get_version_from_name(name: str) -> str:
-        ver = re.findall(r"(\d+[._]\d+|\d+)[._](\d+)__", name)
-        if not ver:
+        pattern = rf"^{re.escape(settings.SQL_MIGRATION_PREFIX)}([\d._]+){re.escape(settings.SQL_MIGRATION_SEPARATOR)}"
+        match = re.match(pattern, name)
+
+        if not match:
             raise ValueError(VALID_NAME_ERROR % (name, Utils.expected_pattern()))
 
-        if isinstance(ver[0], tuple):
-            version: str = ".".join(ver[0])
-            version = version.replace("_", ".")
-        else:
-            version = ver[0].replace("_", ".")
+        version_part = match.group(1)
+        # Normalize separators: replace _ with .
+        version = version_part.replace("_", ".")
 
         return version
 
@@ -129,4 +141,5 @@ class Utils():
 
     @staticmethod
     def format_version(version: str) -> str:
-        return ".".join(f"{int(v):02}" for v in version.split("."))
+        """Normalize version string (replace _ with .)."""
+        return version.replace("_", ".")

@@ -24,8 +24,8 @@ class Info():
         if not tbls:
             return "No migrations found."
         else:
-            return tabulate(tbls, headers="keys",
-                            tablefmt=self.tablefmt, floatfmt=".2f")
+            return tabulate(tbls, headers="keys", tablefmt=self.tablefmt,
+                            disable_numparse=True)
 
     def get_table_info(self) -> List:
         # Get remote migrations (and validate that the files exist)

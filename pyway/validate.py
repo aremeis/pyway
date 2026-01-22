@@ -31,10 +31,13 @@ class Validate():
                 raise RuntimeError(MIGRATIONS_NOT_FOUND % self.migration_dir)
 
         if local_migrations:
-            local_migrations_map = Utils.create_map_from_list("version", local_migrations)
+            # Use tuple-based version keys for backward compatibility with old padded versions
+            local_migrations_map = {Utils._version_sort_key(m.version): m for m in local_migrations}
             for db_migration in db_migrations:
                 output += Utils.color(f"Validating --> {db_migration.name}\n", bcolors.OKBLUE)
-                local_migration: Union[Migration, Any] = local_migrations_map.get(db_migration.version)
+                local_migration: Union[Migration, Any] = local_migrations_map.get(
+                    Utils._version_sort_key(db_migration.version)
+                )
                 if self._out_of_date(local_migration):
                     raise RuntimeError(OUT_OF_DATE_ERROR % db_migration.name)
                 elif not self._diff_names(local_migration, db_migration):

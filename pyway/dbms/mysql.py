@@ -11,7 +11,7 @@ from pyway.configfile import ConfigFile
 
 CREATE_VERSION_MIGRATIONS = "create table if not exists %s ("\
     "installed_rank serial PRIMARY KEY,"\
-    "version varchar(20) NOT NULL,"\
+    "version varchar(100) NOT NULL,"\
     "extension varchar(20) NOT NULL,"\
     "name varchar(125) NOT NULL,"\
     "checksum varchar(25) NOT NULL,"\
