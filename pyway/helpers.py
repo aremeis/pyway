@@ -24,8 +24,8 @@ class Utils():
     def subtract(list_a: List, list_b: List) -> List:
         result = []
         if list_a and list_b:
-            checksum_list_b = [b.checksum for b in list_b]
-            result = [a for a in list_a if a.checksum not in checksum_list_b]
+            version_set_b = {Utils._version_sort_key(b.version) for b in list_b}
+            result = [a for a in list_a if Utils._version_sort_key(a.version) not in version_set_b]
         elif list_a and not list_b:
             # List B is empty (usually from a new install)
             return list_a
