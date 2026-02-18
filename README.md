@@ -6,6 +6,13 @@
 ## Overview
 Pyway is a database versioning and migration tool inspired by Flyway
 
+## Changes from upstream pyway
+This is a fork of [jasondcamp/pyway](https://github.com/jasondcamp/pyway) with the following additions:
+
+- **Python migrations**: Run complex data transformations using Python scripts alongside SQL migrations. Supports both sync and async `migrate(connection)` functions.
+- **Flexible version numbering**: Version numbers support arbitrary levels and digits per level (e.g., `V1__`, `V1_2__`, `V1_2_3__`, `V10_200_3000__`), instead of being limited to fixed-width two-digit segments.
+- **Standard config priority**: Configuration priority follows the conventional CLI pattern: command line arguments override environment variables, which override config file values.
+
 ## Supported Databases
 - MySQLd Commercial (Version 8+)
 - MariaDB (Version 10+)
@@ -26,7 +33,7 @@ Or clone the repo:
 ## Configuration
 #### Pyway environment variables and command line options
 
-Priority is `env variables` -> `config file` -> `command args`
+Priority (highest to lowest): `command args` > `env variables` > `config file`
 
 | Env Variable | Command Line | Description | Default |
 | --------------- | -------------- | -------------- | :--------------: |

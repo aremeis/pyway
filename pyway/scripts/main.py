@@ -63,7 +63,8 @@ def cli() -> None:
 
     config = Settings.parse_arguments()
     config_file = Settings.parse_config_file(config.config)
-    config.merge(config_file)
+    config_file.merge(config)
+    config = config_file
 
     # Validate required vars
     Utils.check_required_vars(["database_type", "database_table", "database_host",
