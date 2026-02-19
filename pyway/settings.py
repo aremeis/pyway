@@ -28,7 +28,7 @@ class Settings():
     @classmethod
     def parse_arguments(self) -> ConfigFile:
         parser: argparse.ArgumentParser = argparse.ArgumentParser()
-        parser.add_argument("--database-migration-dir", help="Database migration directory", default="resources")
+        parser.add_argument("--database-migration-dir", help="Database migration directory")
         parser.add_argument("--database-table", help="Database table that stores pyway metadata")
         parser.add_argument("--database-type", help="Database type [postgres|mysql|duckdb|sqlite]")
         parser.add_argument("--database-host", help="Database host")
@@ -36,7 +36,7 @@ class Settings():
         parser.add_argument("--database-name", help="Database name")
         parser.add_argument("--database-username", help="Database username")
         parser.add_argument("--database-password", help="Database password")
-        parser.add_argument("--database-collation", help="Database collation", default="utf8mb4_general_ci")
+        parser.add_argument("--database-collation", help="Database collation")
 
         parser.add_argument("--schema-file", help="Schema file for import")
         parser.add_argument("--checksum-file", help="Checksum to update")

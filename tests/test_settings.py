@@ -12,7 +12,9 @@ from pyway.configfile import MockArgs
 @pytest.mark.settings_test
 def test_settings_database_migration_dir() -> None:
     config = ConfigFile()
-    assert config.database_migration_dir == 'resources'
+    assert config.database_migration_dir is None
+    config_with_kwarg = ConfigFile(database_migration_dir='migrations')
+    assert config_with_kwarg.database_migration_dir == 'migrations'
 
 
 @pytest.mark.settings_test

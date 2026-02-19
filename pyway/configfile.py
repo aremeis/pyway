@@ -5,7 +5,7 @@ from typing import Any, Union
 
 class ConfigFile():
     def __init__(self, **kwargs: Any) -> None:
-        self.database_migration_dir = os.environ.get('PYWAY_DATABASE_MIGRATION_DIR', kwargs.get('database_migration_dir', 'resources'))
+        self.database_migration_dir = os.environ.get('PYWAY_DATABASE_MIGRATION_DIR', kwargs.get('database_migration_dir'))
         self.database_table = os.environ.get('PYWAY_TABLE', kwargs.get('database_table'))
         self.database_type = os.environ.get('PYWAY_TYPE', kwargs.get('database_type'))
         self.database_host = os.environ.get('PYWAY_DATABASE_HOST', kwargs.get('database_host'))

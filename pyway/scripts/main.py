@@ -66,6 +66,12 @@ def cli() -> None:
     config_file.merge(config)
     config = config_file
 
+    # Apply defaults for optional settings
+    if config.database_migration_dir is None:
+        config.database_migration_dir = 'resources'
+    if config.database_collation is None:
+        config.database_collation = 'utf8mb4_general_ci'
+
     # Validate required vars
     Utils.check_required_vars(["database_type", "database_table", "database_host",
                                "database_name", "database_username"], config)
