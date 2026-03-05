@@ -76,21 +76,25 @@ def cli() -> None:
     Utils.check_required_vars(["database_type", "database_table", "database_host",
                                "database_name", "database_username"], config)
 
-    if config.cmd == "info":
-        info(config)
-    elif config.cmd == "validate":
-        validate(config)
-    elif config.cmd == "migrate":
-        if hasattr(config, 'async_mode') and config.async_mode:
-            asyncio.run(migrate_async(config))
+    try:
+        if config.cmd == "info":
+            info(config)
+        elif config.cmd == "validate":
+            validate(config)
+        elif config.cmd == "migrate":
+            if hasattr(config, 'async_mode') and config.async_mode:
+                asyncio.run(migrate_async(config))
+            else:
+                migrate(config)
+        elif config.cmd == "import":
+            import_(config)
+        elif config.cmd == "checksum":
+            checksum(config)
         else:
-            migrate(config)
-    elif config.cmd == "import":
-        import_(config)
-    elif config.cmd == "checksum":
-        checksum(config)
-    else:
-        logger.error(f"Command '{config.cmd}' not recognized, exiting!")
+            logger.error(f"Command '{config.cmd}' not recognized, exiting!")
+            sys.exit(1)
+    except RuntimeError as error:
+        logger.error(str(error))
         sys.exit(1)
 
 

@@ -39,7 +39,7 @@ class Migrate():
                 self._db.upgrade_version(migration)
                 output += Utils.color(f"{migration.name} SUCCESS\n", bcolors.OKBLUE)
             except Exception as error:
-                raise RuntimeError(error)
+                raise RuntimeError(f"Migration {migration.name} failed: {error}")
         return output
 
     async def run_async(self) -> str:
@@ -62,7 +62,7 @@ class Migrate():
                 self._db.upgrade_version(migration)
                 output += Utils.color(f"{migration.name} SUCCESS\n", bcolors.OKBLUE)
             except Exception as error:
-                raise RuntimeError(error)
+                raise RuntimeError(f"Migration {migration.name} failed: {error}")
         return output
 
     def _get_migration_files_to_be_executed(self) -> List:
